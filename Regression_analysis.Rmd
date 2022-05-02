@@ -1,0 +1,57 @@
+---
+title: "Logistic Regression"
+author: "Prashant_Tiwari"
+date: "4/30/2022"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+starData = read.csv("Stars.csv")
+summary(starData)
+starData$Type <- as.factor(starData$Type)
+```
+
+## Creating Model
+
+
+```{r pressure, echo=FALSE}
+set.seed(121)
+ind <- sample(2, nrow(starData), replace = T, prob = c(0.9, 0.1))
+train <- starData[ind == 1,]
+test <- starData[ind == 2,]
+# Setting the reference
+
+library(nnet)
+# Training the multinomial model
+multinom_model <- multinom(Type ~ ., data = train)
+summary(multinom_model)
+exp(coef(multinom_model))
+round(fitted(multinom_model))
+
+# Predicting the Type for train dataset
+train$TypePredicted <- predict(multinom_model, newdata = train, "class")
+# Building classification table
+tabtrain <- table(train$Type, train$TypePredicted)
+# Calculating accuracy - sum of diagonal elements divided by total obs
+round((sum(diag(tabtrain))/sum(tabtrain))*100,2)
+
+# Predicting the Type for test dataset
+test$TypePredicted <- predict(multinom_model, newdata = test, "class")
+# Building classification table
+tabtest <- table(test$Type, test$TypePredicted)
+# Calculating accuracy - sum of diagonal elements divided by total obs
+round((sum(diag(tabtest))/sum(tabtest))*100,2)
+
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
