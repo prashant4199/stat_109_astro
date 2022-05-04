@@ -19,12 +19,8 @@ pairs.panels(df, ellipses=F, bg = c("red","green","yellow","blue","lightgreen","
 
 table(df$Type)
 set.seed(1234)
-# samp <- createDataPartition(as.factor(df$Color), p = 0.50, list = F)
-# 
-# train = df[samp,]
-# test = df[-samp,]
 
-ind <- sample(2, nrow(df), replace = T, prob = c(0.5, 0.5))
+ind <- sample(2, nrow(df), replace = T, prob = c(0.75, 0.25))
 train <- df[ind == 1,]
 test <- df[ind == 2,]
 
@@ -114,7 +110,7 @@ boo <- train(Type ~ .,
              method = "xgbTree",
              trControl = cvcontrol,
              tuneGrid = expand.grid( nrounds = 500,
-                                     max_depth = 4,
+                                     max_depth = 3,
                                      eta = 0.28,
                                      gamma = 1.8,
                                      colsample_bytree = 1,
