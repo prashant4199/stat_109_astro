@@ -5,21 +5,29 @@ library(mlbench)
 library(caret)
 library(e1071)
 library(lime)
+library(psych)
+options(scipen=999)
 
-        
-df <- read.csv(file = "Stars.csv")
-df$Type <- as.factor(df$Type)
+df <- read.csv(file = "DataStars1.csv", header = T)
+df$Type <- as.factor(df$Type) # convert the variable Type as a factor.
+
+
 str(df)
+summary(df)
+pairs.panels(df, ellipses=F, bg = c("red","green","yellow","blue","lightgreen","black")[df$Type], hist.col = "gray"
+             , lm = F)
 
-pairs.panels(df)
 table(df$Type)
-
 set.seed(1234)
-ind <- sample(2,nrow(df), replace = T, prob = c(0.5,0.5))
+# samp <- createDataPartition(as.factor(df$Color), p = 0.50, list = F)
+# 
+# train = df[samp,]
+# test = df[-samp,]
+
+ind <- sample(2, nrow(df), replace = T, prob = c(0.5, 0.5))
 train <- df[ind == 1,]
 test <- df[ind == 2,]
 
-#Regression
 
 #Bagging
 
@@ -28,7 +36,7 @@ cvcontrol <- trainControl(method = "repeatedcv",
                           number = 5,
                           repeats = 2,
                           allowParallel = T
-                          )
+)
 
 set.seed(1234)
 bag <- train(Type ~ .,
@@ -36,7 +44,9 @@ bag <- train(Type ~ .,
              method = "treebag",
              trControl = cvcontrol,
              importance = T)
-plot(varImp(bag))
+plot(varImp(bag), main = "BAGGING")
+p <- predict(bag, test, type = 'raw')
+confusionMatrix(p, test$Type)
 
 
 #RF
@@ -48,7 +58,9 @@ forest <- train(Type ~ .,
                 trControl = cvcontrol,
                 importance = T)
 plot(forest)
-plot(varImp(forest))
+plot(varImp(forest), main = "RANDOM FOREST")
+p <- predict(forest, test, type = 'raw')
+confusionMatrix(p, test$Type)
 
 #Explain Predictions
 
@@ -60,10 +72,76 @@ explanation <- explain(x = test[1:10,],
                        n_features = 5)
 plot_features(explanation)
 
-# Data transformation
-# give us a input of spectrum and output is a color
-# to find the color there = wavelength , each of the elements temperature
-# Logistic Regression model 
+
+# Boosting different gamma values
+
+set.seed(1234)
+boo <- train(Type ~ .,
+             data = train,
+             method = "xgbTree",
+             trControl = cvcontrol,
+             tuneGrid = expand.grid( nrounds = 500,
+                                     max_depth = 4,
+                                     eta = 0.28,
+                                     gamma = 1,
+                                     colsample_bytree = 1,
+                                     min_child_weight = 1,
+                                     subsample =1))
+
+plot(varImp(boo), main = "XG BOOST Gamma = 1")
+p <- predict(boo, test, type = 'raw')
+confusionMatrix(p,test$Type)
+
+
+boo <- train(Type ~ .,
+             data = train,
+             method = "xgbTree",
+             trControl = cvcontrol,
+             tuneGrid = expand.grid( nrounds = 500,
+                                     max_depth = 3,
+                                     eta = 0.50,
+                                     gamma = 2,
+                                     colsample_bytree = 1,
+                                     min_child_weight = 1,
+                                     subsample =1))
+
+plot(varImp(boo), main = "XG BOOST Gamma = 2")
+p <- predict(boo, test, type = 'raw')
+confusionMatrix(p,test$Type)
+
+boo <- train(Type ~ .,
+             data = train,
+             method = "xgbTree",
+             trControl = cvcontrol,
+             tuneGrid = expand.grid( nrounds = 500,
+                                     max_depth = 4,
+                                     eta = 0.28,
+                                     gamma = 1.8,
+                                     colsample_bytree = 1,
+                                     min_child_weight = 1,
+                                     subsample =1))
+
+plot(varImp(boo), main = "XG BOOST Gamma = 1.8")
+p <- predict(boo, test, type = 'raw')
+confusionMatrix(p,test$Type)
+
+
+boo <- train(Type ~ .,
+             data = train,
+             method = "xgbTree",
+             trControl = cvcontrol,
+             tuneGrid = expand.grid( nrounds = 500,
+                                     max_depth = 4,
+                                     eta = 0.28,
+                                     gamma = 0,
+                                     colsample_bytree = 1,
+                                     min_child_weight = 1,
+                                     subsample =1))
+
+plot(varImp(boo), main = "XG BOOST Gamma = 0")
+p <- predict(boo, test, type = 'raw')
+confusionMatrix(p,test$Type)
+
 
 
 # Temperature
@@ -74,14 +152,3 @@ plot_features(explanation)
 # Spectral Class
 # Type
 # HR Diagram Hertzsprung Russell Diagram
-
-# Random Forest - Type is the response variable 
-# Classification - Daniel
-# Logistic Regression - Prashanth
-# 
-# Red Dwarf - 0
-# Brown Dwarf - 1
-# White Dwarf - 2
-# Main Sequence - 3
-# Super Giants - 4
-# Hyper Giants - 5
