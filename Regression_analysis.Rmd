@@ -30,7 +30,7 @@ library(nnet)
 library(caret)
 set.seed(121)
 #ind <- sample(2, nrow(starData), replace = T, prob = c(0.9, 0.1))
-samp <- createDataPartition(as.factor(starData$Type), p=0.60, list = F)
+samp <- createDataPartition(as.factor(starData$Type), p=0.75, list = F)
 train=starData[samp,]
 test = starData[-samp,]
 
@@ -43,22 +43,28 @@ test = starData[-samp,]
 multinom_model <- multinom(Type ~ ., data = train)
 summary(multinom_model)
 exp(coef(multinom_model))
-round(fitted(multinom_model))
+#round(fitted(multinom_model))
 
 # Predicting the Type for train dataset
 train$TypePredicted <- predict(multinom_model, newdata = train, "class")
 # Building classification table
 tabtrain <- table(train$Type, train$TypePredicted)
 # Calculating accuracy - sum of diagonal elements divided by total obs
-round((sum(diag(tabtrain))/sum(tabtrain))*100,2)
+#round((sum(diag(tabtrain))/sum(tabtrain))*100,2)
 
 # Predicting the Type for test dataset
 test$TypePredicted <- predict(multinom_model, newdata = test, "class")
 # Building classification table
 tabtest <- table(test$Type, test$TypePredicted)
 # Calculating accuracy - sum of diagonal elements divided by total obs
-round((sum(diag(tabtest))/sum(tabtest))*100,2)
+#round((sum(diag(tabtest))/sum(tabtest))*100,2)
 
+library(caret) 
+# Accuracy for Training Data
+confusionMatrix(tabtrain)
+# Accuracy for Testing Data
+confusionMatrix(tabtest)
 ```
 
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
