@@ -21,8 +21,7 @@ pairs.panels(
   df,
   ellipses = F,
   bg = c("red", "green", "yellow", "blue", "lightgreen", "black")[df$Type],
-  hist.col = "gray"
-  ,
+  hist.col = "gray",
   lm = F
 )
 
@@ -33,7 +32,7 @@ train <- df[ind == 1, ]
 test <- df[ind == 2, ]
 
 
-#Bagging
+# Bagging
 
 
 cvcontrol <- trainControl(
@@ -53,14 +52,14 @@ bag <- train(
 )
 plot(varImp(bag), main = "BAGGING")
 
-p_train <- predict(bag, train, type = 'raw')
+p_train <- predict(bag, train, type = "raw")
 confusionMatrix(p_train, train$Type)
 
-p <- predict(bag, test, type = 'raw')
+p <- predict(bag, test, type = "raw")
 confusionMatrix(p, test$Type)
 
 
-#RF
+# RF
 forest <- train(
   Type ~ .,
   data = train,
@@ -71,13 +70,13 @@ forest <- train(
 plot(forest)
 plot(varImp(forest), main = "RANDOM FOREST")
 
-p_train <- predict(forest, train, type = 'raw')
+p_train <- predict(forest, train, type = "raw")
 confusionMatrix(p_train, train$Type)
 
-p <- predict(forest, test, type = 'raw')
+p <- predict(forest, test, type = "raw")
 confusionMatrix(p, test$Type)
 
-#Explain Predictions
+# Explain Predictions
 
 explainer <- lime(test[1:10, ], forest, n_features = 5)
 explanation <- explain(
@@ -111,10 +110,10 @@ boo <- train(
 
 plot(varImp(boo), main = "XG BOOST Gamma = 1")
 
-p_train <- predict(boo, train, type = 'raw')
+p_train <- predict(boo, train, type = "raw")
 confusionMatrix(p_train, train$Type)
 
-p <- predict(boo, test, type = 'raw')
+p <- predict(boo, test, type = "raw")
 confusionMatrix(p, test$Type)
 
 
@@ -135,7 +134,7 @@ boo <- train(
 )
 
 plot(varImp(boo), main = "XG BOOST Gamma = 2")
-p <- predict(boo, test, type = 'raw')
+p <- predict(boo, test, type = "raw")
 confusionMatrix(p, test$Type)
 
 boo <- train(
@@ -155,7 +154,7 @@ boo <- train(
 )
 
 plot(varImp(boo), main = "XG BOOST Gamma = 1.8")
-p <- predict(boo, test, type = 'raw')
+p <- predict(boo, test, type = "raw")
 confusionMatrix(p, test$Type)
 
 
@@ -176,6 +175,5 @@ boo <- train(
 )
 
 plot(varImp(boo), main = "XG BOOST Gamma = 0")
-p <- predict(boo, test, type = 'raw')
+p <- predict(boo, test, type = "raw")
 confusionMatrix(p, test$Type)
-
